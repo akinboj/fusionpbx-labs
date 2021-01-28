@@ -9,6 +9,6 @@ docker exec 492 sudo -u postgres psql -c "ALTER USER fusionpbx WITH PASSWORD 'ye
 
 rm -rf /var/www/fusionpbx/resources/config.php
 
-git clone --single-branch --branch feature/177379-Get-Patient-Surgery-Data-From-ACTPAS https://actgovernment@dev.azure.com/ACTGovernment/Pegacorn/_git/aether-host-files
+git clone --single-branch --branch feature/development https://github.com/akinboj/fusionpbx-labs.git
 
 DEL /S /Q *.war
