@@ -1,0 +1,14 @@
+docker run --net=host --privileged --name lingo-fusionpbx akinboj/fusionpbx-docker:1.0.0
+
+
+\helm\helm upgrade pegacorn-fusionpbx-site-a --install --namespace site-a --set serviceName=pegacorn-fusionpbx,imageTag=1.0.0,numOfPods=1 helm
+
+
+docker exec 492 sudo -u postgres psql -c "ALTER USER fusionpbx WITH PASSWORD 'yemi';"
+
+
+rm -rf /var/www/fusionpbx/resources/config.php
+
+git clone --single-branch --branch feature/177379-Get-Patient-Surgery-Data-From-ACTPAS https://actgovernment@dev.azure.com/ACTGovernment/Pegacorn/_git/aether-host-files
+
+DEL /S /Q *.war
