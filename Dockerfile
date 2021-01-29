@@ -62,21 +62,6 @@ RUN usermod -a -G freeswitch www-data \
 	&& chown -R freeswitch:freeswitch /var/log/freeswitch \ 	
 	&& chmod -R ug+rw /var/log/freeswitch \ 	
 	&& find /var/log/freeswitch -type d -exec chmod 2770 {} \;
-	
-# Postgres database configuration
-ENV PSQL_PASSWORD="psqlpass"  
-RUN password=$(dd if=/dev/urandom bs=1 count=20 2>/dev/null | base64) \
-	&& apt-get install -y --force-yes sudo postgresql \
-	&& apt-get clean
-RUN service postgresql start \
-	&& sleep 10 \
-	&& echo "psql -c \"CREATE DATABASE fusionpbx\";" | su - postgres \
-	&& echo "psql -c \"CREATE DATABASE freeswitch\";" | su - postgres \
-	&& echo "psql -c \"CREATE ROLE fusionpbx WITH SUPERUSER LOGIN PASSWORD '$PSQL_PASSWORD'\";" | su - postgres \
-        && echo "psql -c \"CREATE ROLE freeswitch WITH SUPERUSER LOGIN PASSWORD '$PSQL_PASSWORD'\";" | su - postgres \
-        && echo "psql -c \"GRANT ALL PRIVILEGES ON DATABASE fusionpbx to fusionpbx\";"  | su - postgres \
-        && echo "psql -c \"GRANT ALL PRIVILEGES ON DATABASE freeswitch to fusionpbx\";" | su - postgres \
-        && echo "psql -c \"GRANT ALL PRIVILEGES ON DATABASE freeswitch to freeswitch\";" | su - postgres 
 
 # Date-time build argument
 ARG IMAGE_BUILD_TIMESTAMP
