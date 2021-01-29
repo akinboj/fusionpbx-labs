@@ -12,3 +12,29 @@ rm -rf /var/www/fusionpbx/resources/config.php
 git clone --single-branch --branch feature/development https://github.com/akinboj/fusionpbx-labs.git
 
 DEL /S /Q *.war
+==================================================
+#Create-Cert-Set -certSubject 'pegacorn-fhirplace.site-a' -certPwd 'Peg@corn'
+Create-Cert-Set -certSubject 'pegacorn-fusionpbx-dbaas.site-a' -certPwd 'Peg@corn'
+
+#Create-Cert-Set -certSubject 'pegacorn-fhirplace-gateway.site-a' -certPwd 'Peg@cornK3yFG' -createKeystore $True -truststorePwd 'Peg@cornTrustSt0reFG'
+Create-Cert-Set -certSubject 'pegacorn-fusionpbx.site-a' -certPwd 'Peg@cornK3yPBX' -createKeystore $True -truststorePwd 'Peg@cornTrustSt0rePB'
+
+
+
+#kubectl create secret generic pegacorn-fhirplace-secrets --from-literal=keyPassword="Peg@corn" --namespace=site-a
+kubectl create secret generic pegacorn-fusionpbx-dbaas-secrets --from-literal=keyPassword="Peg@corn" --namespace=site-a
+
+#kubectl create secret generic pegacorn-fhirplace-gateway-secrets --from-literal=keyPassword="Peg@cornK3yFG" --from-literal=truststorePassword="Peg@cornTrustSt0reAA" --from-literal=dbUserKeyPassword="Peg@corn" --namespace=site-a
+kubectl create secret generic pegacorn-fusionpbx-secrets --from-literal=keyPassword="Peg@cornK3yPBX" --from-literal=truststorePassword="Peg@cornTrustSt0reAA" --from-literal=dbUserKeyPassword="Peg@corn" --namespace=site-a
+
+
+#\helm\helm upgrade pegacorn-fhirplace-site-a --install --namespace site-a --set serviceName=pegacorn-fhirplace,nodeAffinityLabel=fhirplace,hostPath=/data/fhirplace-site-a/data,hostPathCerts=/data/certificates,basePort=30500,imageTag=1.0.0-snapshot,dbUser=pegacorn,dbName=hapi,serviceType=NodePort helm-postgres
+
+\helm\helm upgrade pegacorn-fusionpbx-dbaas.site-a --install --namespace site-a --set serviceName=pegacorn-fusionpbx-dbaas,nodeAffinityLabel=callserver,hostPath=/data/fusionpbx-dbaas-site-a/data,hostPathCerts=/data/certificates,basePort=30510,imageTag=1.0.0-snapshot,dbUser=fusionpbx,dbName=fusionpbx,serviceType=NodePort helm-postgres
+
+#\helm\helm upgrade pegacorn-fhirplace-gateway-site-a --install --namespace site-a --set serviceName=pegacorn-fhirplace-gateway,nodeAffinityLabel=fhirplace,basePort=30502,imageTag=5.1.0-custom-snapshot,dataSourceServiceName=pegacorn-fhirplace,dataSourcePortAndDBName="30500/hapi",hostPathCerts=/data/certificates,dbUser=pegacorn,clientCertSubject="CN\\\\=aether-ladon-gen0.site-a",jvmMaxHeapSizeMB=768,wildflyLogLevel=INFO,wildflyAdminUser=admin,wildflyAdminPwd=Pega@dm1n helm
+
+\helm\helm upgrade pegacorn-fusionpbx-site-a --install --namespace site-a --set serviceName=pegacorn-fusionpbx,nodeAffinityLabel=callserver,basePort=30512,imageTag=1.0.0,dataSourceServiceName=pegacorn-fusionpbx-dbaas,dataSourcePortAndDBName="30510/fusionpbx",hostPathCerts=/data/certificates,dbUser=fusionpbx,clientCertSubject="CN\\\\=aether-ladon-gen0.site-a",jvmMaxHeapSizeMB=768,wildflyLogLevel=INFO,wildflyAdminUser=admin,wildflyAdminPwd=Pega@dm1n helm
+
+
+\helm\helm upgrade pegacorn-fusionpbx-site-a --install --namespace site-a --set serviceName=pegacorn-fusionpbx,imageTag=1.0.0,numOfPods=1 helm
