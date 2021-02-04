@@ -32,30 +32,9 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.acrSecretName }}
       {{- end }}
-      #hostNetwork: true <Didn't like this on microk8s>
+      hostNetwork: true
       containers:
       - env:
-        - name: TRUSTSTORE_PASSWORD
-          valueFrom:
-           secretKeyRef:
-            name: {{ .Values.serviceName }}-secrets
-            key: truststorePassword
-        - name: KEY_PASSWORD
-          valueFrom:
-           secretKeyRef:
-            name: {{ .Values.serviceName }}-secrets
-            key: keyPassword
-        - name: DB_USER_KEY_PASSWORD
-          valueFrom:
-           secretKeyRef:
-            name: {{ .Values.serviceName }}-secrets
-            key: dbUserKeyPassword
-        - name: DATASOURCE_SERVICE_NAME
-          value: {{ .Values.dataSourceServiceName }}
-        - name: DATASOURCE_PORT_AND_DBNAME
-          value: {{ .Values.dataSourcePortAndDBName }}
-        - name: FBX_DATASOURCE_USER
-          value: {{ .Values.dbUser }}
         - name: MY_HOST_IP
           valueFrom:
             fieldRef:
@@ -114,14 +93,4 @@ spec:
             port: 80
             scheme: HTTP
           initialDelaySeconds: 120
-        securityContext:
-          privileged: false
-        volumeMounts:
-        - name: certificates
-          mountPath: /var/lib/pegacorn-ssl-certs
-      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
-      volumes:
-      - name: certificates
-        hostPath:
-          path: {{ .Values.hostPathCerts }}
 
