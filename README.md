@@ -1,5 +1,5 @@
 # fusionpbx-labs
-Deploy Fusionpbx in K8s
+Deploy Fusionpbx - Debian 10 (Buster) and PHP 7.3
 
 # Build docker image:
 docker build --rm -t {name_of_image} --file Dockerfile .
