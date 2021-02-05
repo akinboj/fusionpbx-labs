@@ -32,7 +32,7 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.acrSecretName }}
       {{- end }}
-      hostNetwork: true
+      #hostNetwork: true
       containers:
       - env:
         - name: MY_HOST_IP
@@ -75,7 +75,7 @@ spec:
             path: /
             port: 80
             scheme: HTTP
-          initialDelaySeconds: 120
+          initialDelaySeconds: 60
         name: fusionpbx
         ports:
         - containerPort: 80
@@ -92,5 +92,5 @@ spec:
             path: /
             port: 80
             scheme: HTTP
-          initialDelaySeconds: 120
+          initialDelaySeconds: 60
 

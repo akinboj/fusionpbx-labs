@@ -1,5 +1,7 @@
 FROM debian:buster
-MAINTAINER Darren Williams <support@directvoip.co.uk>
+# Reference for this build:
+# https://github.com/igorolhovskiy/fusionpbx-docker/blob/4.4/Dockerfile
+# https://github.com/PBXForums/fusionpbx-docker/blob/master/Dockerfile
 
 # Expose ports
 # https://hub.docker.com/layers/sharks/fusionpbx64x/latest/images/sha256-20124991a611eb7c4145f6a8bbca8a1fda69234bf486a32613a355d73c4014e0?context=explore
@@ -40,16 +42,17 @@ RUN apt-get update \
 # https://stackoverflow.com/questions/57438387/docker-php7-cli-debian-buster-how-to-install-package-php-imagick
 
 # Install php 7.3
+# https://serverfault.com/questions/786398/how-do-i-start-php7-0-fpm-with-supervisord
 RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee -a /etc/apt/sources.list.d/php.list \
     && curl https://packages.sury.org/php/apt.gpg | apt-key add - \
     && apt-get update -qq \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y php7.3 php7.3-cli php7.3-fpm php7.3-pgsql php7.3-sqlite php7.3-odbc php7.3-curl php7.3-imap php7.3-xml
 # Start php service
-# https://serverfault.com/questions/786398/how-do-i-start-php7-0-fpm-with-supervisord
 RUN service php7.3-fpm start
 
-# Install Fusionpbx and keys
-RUN git clone https://github.com/fusionpbx/fusionpbx.git /var/www/fusionpbx
+# Install Fusionpbx and keys and update fusionpbx to use fast process manager 7.3
+RUN git clone https://github.com/fusionpbx/fusionpbx.git /var/www/fusionpbx \
+	&& chown -R www-data:www-data /var/www/fusionpbx
 RUN wget https://raw.githubusercontent.com/fusionpbx/fusionpbx-install.sh/master/debian/resources/nginx/fusionpbx -O /etc/nginx/sites-available/fusionpbx \ 
 	&& find /etc/nginx/sites-available/fusionpbx -type f -exec sed -i 's/\/var\/run\/php\/php7.1-fpm.sock/\/run\/php\/php'"7.3"'-fpm.sock/g' {} \; \	
 	&& ln -s /etc/nginx/sites-available/fusionpbx /etc/nginx/sites-enabled/fusionpbx \ 	
@@ -62,6 +65,7 @@ RUN wget https://raw.githubusercontent.com/fusionpbx/fusionpbx-install.sh/master
 COPY webrtc /var/www/fusionpbx/app
 
 # Begin freeswitch software install
+# https://freeswitch.org/confluence/display/FREESWITCH/Debian+10+Buster
 RUN wget -O - https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc | apt-key add - \
 	&& echo "deb http://files.freeswitch.org/repo/deb/debian-release/ `lsb_release -sc` main" > /etc/apt/sources.list.d/freeswitch.list \
 	&& echo "deb-src http://files.freeswitch.org/repo/deb/debian-release/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list \
@@ -116,7 +120,6 @@ RUN wget -O - https://files.freeswitch.org/repo/deb/debian-release/fsstretch-arc
 	freeswitch-mod-flite \
 	freeswitch-mod-distributor \
 	freeswitch-meta-codecs \
-	freeswitch-mod-pgsql \
 	freeswitch-music-default \
     && usermod -a -G freeswitch www-data \
     && usermod -a -G www-data freeswitch \
@@ -139,7 +142,7 @@ RUN wget -O - https://files.freeswitch.org/repo/deb/debian-release/fsstretch-arc
     && mkdir -p /run/php/ \
     && apt-get clean
     
-# Postgres database configuration
+# Postgres database configuration <TD: separate for scalability>
 ENV PSQL_PASSWORD="psqlpass"  
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add - \
 	&& sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" >> /etc/apt/sources.list.d/pgdg.list' \
