@@ -37,17 +37,14 @@ RUN apt-get update \
 	bsdmainutils \
 	sudo
 
-# Install Required Dependencies
-# PHP issues in Debian
+# Install php 7.3 - PHP issues in Debian
 # https://stackoverflow.com/questions/57438387/docker-php7-cli-debian-buster-how-to-install-package-php-imagick
-
-# Install php 7.3
-# https://serverfault.com/questions/786398/how-do-i-start-php7-0-fpm-with-supervisord
 RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee -a /etc/apt/sources.list.d/php.list \
     && curl https://packages.sury.org/php/apt.gpg | apt-key add - \
     && apt-get update -qq \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y php7.3 php7.3-cli php7.3-fpm php7.3-pgsql php7.3-sqlite php7.3-odbc php7.3-curl php7.3-imap php7.3-xml
 # Start php service
+# https://serverfault.com/questions/786398/how-do-i-start-php7-0-fpm-with-supervisord
 RUN service php7.3-fpm start
 
 # Install Fusionpbx and keys and update fusionpbx to use fast process manager 7.3
